@@ -1,0 +1,30 @@
+{
+  "name": "bloxchain-wallet",
+  "version": "1.0.0",
+  "description": "The official Bloxchain Wallet application powered by the Bloxchain Protocol (ParticleCS).",
+  "main": "index.js",
+  "scripts": {
+    "build:contracts": "hardhat compile",
+    "clean": "hardhat clean",
+    "test": "hardhat test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PracticalParticle/Bloxchain-Wallet.git"
+  },
+  "keywords": [],
+  "author": "Particle Crypto Security",
+  "license": "AGPL-3.0-or-later OR LicenseRef-BloxchainWalletCommercial",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/PracticalParticle/Bloxchain-Wallet/issues"
+  },
+  "homepage": "https://github.com/PracticalParticle/Bloxchain-Wallet#readme",
+  "dependencies": {
+    "@bloxchain/contracts": "^1.0.0-alpha",
+    "@bloxchain/sdk": "^1.0.0-alpha"
+  },
+  "devDependencies": {
+    "hardhat": "^3.1.5"
+  }
+}
