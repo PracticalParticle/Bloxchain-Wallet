@@ -15,7 +15,7 @@ Thank you for your interest in contributing to Bloxchain Wallet! This document p
 
 ## Code of Conduct
 
-This project follows professional standards of conduct. By participating, you agree to uphold respectful and professional behavior. Please report unacceptable behavior to conduct@particlecs.com.
+This project follows professional standards of conduct. By participating, you agree to uphold respectful and professional behavior. Please report unacceptable behavior to support@particlecs.com.
 
 ## Getting Started
 
@@ -25,7 +25,7 @@ Before contributing, ensure you have:
 
 - **Node.js** (v18 or higher)
 - **npm** (v8 or higher)
-- **Hardhat** (v2.28 or higher)
+- **Hardhat** (v3.15 or higher)
 - **Git** (latest version)
 - **Solidity** knowledge (0.8.33)
 - Familiarity with **Bloxchain Protocol**

@@ -1,1 +1,74 @@
-node_modules
+### Dependencies ###
+node_modules/
+
+### Build Outputs ###
+out/
+artifacts/
+cache/
+cache_forge/
+build/
+dist/
+
+### IDE ###
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+### Environment Variables ###
+.env
+.env.local
+.env.*.local
+*.env
+
+### OS Files ###
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+### Test Reports & Coverage ###
+coverage/
+coverage.json
+*.lcov
+test-results/
+reports/
+
+### Logs ###
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+### Temporary Files ###
+*.tmp
+*.temp
+*.bak
+*.swp
+
+### Hardhat ###
+.hardhat/
+hardhat-*.log
+
+### Foundry ###
+forge-cache/
+broadcast/
+.chainid
+
+### Deployment Artifacts ###
+deployed-addresses.json
+deployments/
+
+### TypeScript (if used) ###
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
+### Gas Reports ###
+gas-report.txt
+*.gas-snapshot

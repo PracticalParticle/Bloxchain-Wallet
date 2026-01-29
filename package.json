@@ -6,7 +6,14 @@
   "scripts": {
     "build:contracts": "hardhat compile",
     "clean": "hardhat clean",
-    "test": "hardhat test"
+    "test": "hardhat test",
+    "compile:foundry": "forge build",
+    "compile:foundry:size": "forge build --sizes",
+    "test:foundry": "forge test",
+    "test:foundry:verbose": "forge test -vvv",
+    "test:foundry:coverage": "forge coverage",
+    "test:foundry:fuzz": "forge test --fuzz-runs 10000",
+    "test:foundry:invariant": "forge test --invariant-runs 1000"
   },
   "repository": {
     "type": "git",
