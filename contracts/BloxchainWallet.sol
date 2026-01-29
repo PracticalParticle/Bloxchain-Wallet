@@ -38,6 +38,25 @@ contract BloxchainWallet is GuardController, RuntimeRBAC, SecureOwnable {
     /// @dev Limits external calls to untrusted contracts during initialization
     uint256 public constant MAX_DEFINITION_CONTRACTS = 50;
 
+    /// @notice Maximum number of roles allowed during initialization (prevents gas exhaustion and DoS)
+    /// @dev Limits role creation during initialization to prevent excessive gas consumption
+    uint256 public constant MAX_INITIAL_ROLES = 50;
+
+    // ============ STRUCTS ============
+
+    /**
+     * @dev Struct to hold role configuration data for initialization
+     * @param roleName The name of the role (must be unique, non-empty)
+     * @param maxWallets Maximum number of wallets allowed for this role (must be > 0)
+     * @notice Function permissions are NOT included here - they must be added via definition contracts
+     * @notice This ensures function schemas exist before permissions are assigned to roles
+     * @notice Permissions should be added via definition contracts after roles are created
+     */
+    struct RoleConfig {
+        string roleName;
+        uint256 maxWallets;
+    }
+
     // ============ EVENTS ============
 
     /**
@@ -73,29 +92,51 @@ contract BloxchainWallet is GuardController, RuntimeRBAC, SecureOwnable {
     }
 
     /**
-     * @notice Extended initializer that accepts custom definition contracts
+     * @notice Extended initializer that accepts custom roles and definition contracts
      * @param initialOwner The initial owner address
      * @param broadcaster The broadcaster address
      * @param recovery The recovery address
      * @param timeLockPeriodSec The timelock period in seconds
      * @param eventForwarder The event forwarder address (optional)
+     * @param roles Array of role configurations to create before loading definitions
      * @param definitionContracts Array of definition contract addresses implementing IDefinition
-     * @dev System definitions (factory settings) are loaded first, then custom definitions
-     * @dev All validation (protected schemas, duplicates, existence) is handled internally by _loadDefinitions
-     * @notice This allows extending the contract with additional function schemas and role permissions
+     * @dev Execution order:
+     *   1. Initialize base (loads RuntimeRBACDefinitions schemas and protected roles)
+     *   2. Create custom roles (roles are created with isProtected=false)
+     *   3. Load custom definitions (schemas first, then permissions added to existing roles)
+     * @dev All validation (protected schemas, duplicates, existence) is handled internally
+     * @notice RoleConfig.functionPermissions should be EMPTY - permissions are added via definition contracts
+     * @notice This allows extending the contract with custom roles and additional function schemas
+     * @custom:security Roles created during initialization are non-protected and can be modified later
      */
-    function initializeWithDefinitions(
+    function initializeWithRolesAndDefinitions(
         address initialOwner,
         address broadcaster,
         address recovery,
         uint256 timeLockPeriodSec,
         address eventForwarder,
+        RoleConfig[] memory roles,
         IDefinition[] memory definitionContracts
     ) public initializer {
         // Initialize base (validates time lock period and initializes parent contracts)
+        // This also loads RuntimeRBACDefinitions schemas and creates protected roles (OWNER, BROADCASTER, RECOVERY)
         _initializeBase(initialOwner, broadcaster, recovery, timeLockPeriodSec, eventForwarder);
         
-        // Validate array length to prevent gas exhaustion and DoS attacks
+        // Validate roles array length to prevent gas exhaustion and DoS attacks
+        if (roles.length > MAX_INITIAL_ROLES) {
+            revert SharedValidation.BatchSizeExceeded(roles.length, MAX_INITIAL_ROLES);
+        }
+        
+        // Create custom roles before loading definitions
+        // Roles are created with isProtected=false (runtime roles)
+        // All validations (role name, maxWallets, duplicates) are handled by _createRole
+        // Function permissions are NOT set here - they must be added via definition contracts
+        // This ensures proper initialization order: roles first, then schemas, then permissions
+        for (uint256 i = 0; i < roles.length; i++) {
+            _createRole(roles[i].roleName, roles[i].maxWallets, false);
+        }
+        
+        // Validate definition contracts array length to prevent gas exhaustion and DoS attacks
         // Each definition contract makes 2 external calls, so we limit the array size
         if (definitionContracts.length > MAX_DEFINITION_CONTRACTS) {
             revert SharedValidation.BatchSizeExceeded(definitionContracts.length, MAX_DEFINITION_CONTRACTS);
@@ -104,6 +145,7 @@ contract BloxchainWallet is GuardController, RuntimeRBAC, SecureOwnable {
         // Load custom definitions from each definition contract
         // All validation is handled internally by _loadDefinitions with allowProtectedSchemas=false
         // Note: Definition contracts should be trusted or audited, as they make external calls
+        // Definitions can reference roles created above and add permissions to them
         for (uint256 i = 0; i < definitionContracts.length; i++) {
             SharedValidation.validateNotZeroAddress(address(definitionContracts[i]));
             
