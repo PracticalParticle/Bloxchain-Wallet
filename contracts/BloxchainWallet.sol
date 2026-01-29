@@ -42,6 +42,20 @@ contract BloxchainWallet is GuardController, RuntimeRBAC, SecureOwnable {
     /// @dev Limits role creation during initialization to prevent excessive gas consumption
     uint256 public constant MAX_INITIAL_ROLES = 50;
 
+    /// @notice Maximum schemas per definition contract (prevents gas griefing from unbounded getFunctionSchemas())
+    uint256 public constant MAX_SCHEMAS_PER_DEFINITION = 100;
+
+    /// @notice Maximum permissions per definition contract (prevents gas griefing from unbounded getRolePermissions())
+    uint256 public constant MAX_PERMISSIONS_PER_DEFINITION = 200;
+
+    // ============ CUSTOM ERRORS ============
+
+    /// @dev Thrown when the same definition contract address appears more than once in the initialization array
+    error DuplicateDefinitionContract(address definition);
+
+    /// @dev Thrown when an address does not implement the IDefinition interface (ERC165)
+    error DefinitionNotIDefinition(address definition);
+
     // ============ STRUCTS ============
 
     /**
@@ -75,6 +89,7 @@ contract BloxchainWallet is GuardController, RuntimeRBAC, SecureOwnable {
      * @param recovery The recovery address
      * @param timeLockPeriodSec The timelock period in seconds
      * @param eventForwarder The event forwarder address (optional)
+     * @dev For proxy/clone deployments, the deployer should call in the same transaction as deployment.
      */
     function initialize(
         address initialOwner,
@@ -92,7 +107,7 @@ contract BloxchainWallet is GuardController, RuntimeRBAC, SecureOwnable {
     }
 
     /**
-     * @notice Extended initializer that accepts custom roles and definition contracts
+     * @notice Extended initializer with custom roles and definition contracts
      * @param initialOwner The initial owner address
      * @param broadcaster The broadcaster address
      * @param recovery The recovery address
@@ -104,10 +119,8 @@ contract BloxchainWallet is GuardController, RuntimeRBAC, SecureOwnable {
      *   1. Initialize base (loads RuntimeRBACDefinitions schemas and protected roles)
      *   2. Create custom roles (roles are created with isProtected=false)
      *   3. Load custom definitions (schemas first, then permissions added to existing roles)
-     * @dev All validation (protected schemas, duplicates, existence) is handled internally
-     * @notice RoleConfig.functionPermissions should be EMPTY - permissions are added via definition contracts
-     * @notice This allows extending the contract with custom roles and additional function schemas
-     * @custom:security Roles created during initialization are non-protected and can be modified later
+     * @dev All validation (protected schemas, duplicates, bounded sizes) is handled internally
+     * @custom:security-intentional No caller restriction: designed for clone-based factory initialization where the factory creates the clone and calls this initializer in the same transaction. The factory (or deployer) is the only caller; no window exists for front-running. Do not deploy instances without initializing atomically in the same transaction.
      */
     function initializeWithRolesAndDefinitions(
         address initialOwner,
@@ -121,37 +134,49 @@ contract BloxchainWallet is GuardController, RuntimeRBAC, SecureOwnable {
         // Initialize base (validates time lock period and initializes parent contracts)
         // This also loads RuntimeRBACDefinitions schemas and creates protected roles (OWNER, BROADCASTER, RECOVERY)
         _initializeBase(initialOwner, broadcaster, recovery, timeLockPeriodSec, eventForwarder);
-        
+
         // Validate roles array length to prevent gas exhaustion and DoS attacks
         if (roles.length > MAX_INITIAL_ROLES) {
             revert SharedValidation.BatchSizeExceeded(roles.length, MAX_INITIAL_ROLES);
         }
-        
+
         // Create custom roles before loading definitions
-        // Roles are created with isProtected=false (runtime roles)
-        // All validations (role name, maxWallets, duplicates) are handled by _createRole
-        // Function permissions are NOT set here - they must be added via definition contracts
-        // This ensures proper initialization order: roles first, then schemas, then permissions
         for (uint256 i = 0; i < roles.length; i++) {
             _createRole(roles[i].roleName, roles[i].maxWallets, false);
         }
-        
-        // Validate definition contracts array length to prevent gas exhaustion and DoS attacks
-        // Each definition contract makes 2 external calls, so we limit the array size
+
+        // Validate definition contracts array length
         if (definitionContracts.length > MAX_DEFINITION_CONTRACTS) {
             revert SharedValidation.BatchSizeExceeded(definitionContracts.length, MAX_DEFINITION_CONTRACTS);
         }
-        
-        // Load custom definitions from each definition contract
-        // All validation is handled internally by _loadDefinitions with allowProtectedSchemas=false
-        // Note: Definition contracts should be trusted or audited, as they make external calls
-        // Definitions can reference roles created above and add permissions to them
+
+        // Load custom definitions from each definition contract (no duplicates, bounded sizes, allowProtectedSchemas=false)
         for (uint256 i = 0; i < definitionContracts.length; i++) {
-            SharedValidation.validateNotZeroAddress(address(definitionContracts[i]));
-            
+            address def = address(definitionContracts[i]);
+            SharedValidation.validateNotZeroAddress(def);
+
+            // Reject duplicate definition contract addresses
+            for (uint256 j = 0; j < i; j++) {
+                if (address(definitionContracts[j]) == def) revert DuplicateDefinitionContract(def);
+            }
+
+            // This will be applicable in the next bloxchain update
+            // // Require ERC165 IDefinition support for clearer errors and safety
+            // if (!definitionContracts[i].supportsInterface(type(IDefinition).interfaceId)) {
+            //     revert DefinitionNotIDefinition(def);
+            // }
+
             EngineBlox.FunctionSchema[] memory schemas = definitionContracts[i].getFunctionSchemas();
             IDefinition.RolePermission memory permissions = definitionContracts[i].getRolePermissions();
-            
+
+            if (schemas.length > MAX_SCHEMAS_PER_DEFINITION) {
+                revert SharedValidation.BatchSizeExceeded(schemas.length, MAX_SCHEMAS_PER_DEFINITION);
+            }
+            if (permissions.roleHashes.length > MAX_PERMISSIONS_PER_DEFINITION) {
+                revert SharedValidation.BatchSizeExceeded(permissions.roleHashes.length, MAX_PERMISSIONS_PER_DEFINITION);
+            }
+
+            // When using protocol version with allowProtectedSchemas parameter, pass false for custom definitions
             _loadDefinitions(
                 schemas,
                 permissions.roleHashes,
@@ -173,7 +198,8 @@ contract BloxchainWallet is GuardController, RuntimeRBAC, SecureOwnable {
     /**
      * @dev Explicit deposit function for ETH deposits
      * @notice Users must call this function to deposit ETH to the wallet controller
-     * @notice Direct ETH transfers to the contract will revert (no receive() function)
+     * @notice Direct ETH transfers to the contract will revert (receive/fallback revert)
+     * @notice ETH can still be forced in without calling deposit() (e.g. selfdestruct); such balance will not emit EthReceived
      */
     function deposit() external payable {
         emit EthReceived(msg.sender, msg.value);
