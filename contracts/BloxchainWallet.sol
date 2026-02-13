@@ -4,28 +4,20 @@ pragma solidity 0.8.33;
 
 // ============ IMPORTS ============
 
-// Import core components from @bloxchain/contracts package
-import "@bloxchain/contracts/core/execution/GuardController.sol";
-import "@bloxchain/contracts/core/access/RuntimeRBAC.sol";
-import "@bloxchain/contracts/core/security/SecureOwnable.sol";
-import "@bloxchain/contracts/core/base/BaseStateMachine.sol";
-import "@bloxchain/contracts/utils/SharedValidation.sol";
-import "@bloxchain/contracts/interfaces/IDefinition.sol";
+import "@bloxchain/contracts/core/pattern/Account.sol";
+import "@bloxchain/contracts/core/lib/utils/SharedValidation.sol";
+import "@bloxchain/contracts/core/lib/interfaces/IDefinition.sol";
 
 // ============ CONTRACT DOCUMENTATION ============
 
 /**
  * @title BloxchainWallet
- * @dev Official ParticleCS wallet controller built on Bloxchain Protocol
+ * @dev Official ParticleCS wallet controller built on Bloxchain Protocol.
  *
- * This contract is based on the ControlBlox template and combines:
- * - GuardController: Execution workflows and time-locked transactions
- * - RuntimeRBAC: Runtime role creation and management
- * - SecureOwnable: Secure ownership transfer and management
- *
- * It serves as the core on-chain controller for the Bloxchain Wallet application.
+ * Extends the Account pattern (GuardController + RuntimeRBAC + SecureOwnable)
+ * and serves as the core on-chain controller for the Bloxchain Wallet application.
  */
-contract BloxchainWallet is GuardController, RuntimeRBAC, SecureOwnable {
+contract BloxchainWallet is Account {
     // ============ CONSTANTS ============
 
     /// @notice Minimum time lock period: 1 day (86400 seconds)
@@ -50,6 +42,9 @@ contract BloxchainWallet is GuardController, RuntimeRBAC, SecureOwnable {
 
     // ============ CUSTOM ERRORS ============
 
+    /// @dev Thrown when the same definition contract address appears more than once in the initialization array
+    // error DuplicateDefinitionContract(address definition);
+
     /// @dev Thrown when an address does not implement the IDefinition interface (ERC165)
     error DefinitionNotIDefinition(address definition);
 
@@ -67,15 +62,6 @@ contract BloxchainWallet is GuardController, RuntimeRBAC, SecureOwnable {
         string roleName;
         uint256 maxWallets;
     }
-
-    // ============ EVENTS ============
-
-    /**
-     * @dev Emitted when ETH is deposited to the wallet
-     * @param from The address that deposited the ETH
-     * @param amount The amount of ETH deposited
-     */
-    event EthReceived(address indexed from, uint256 amount);
 
     // ============ INITIALIZATION FUNCTIONS ============
 
@@ -97,7 +83,7 @@ contract BloxchainWallet is GuardController, RuntimeRBAC, SecureOwnable {
     )
         public
         virtual
-        override(GuardController, RuntimeRBAC, SecureOwnable)
+        override(Account)
         initializer
     {
         _initializeBase(initialOwner, broadcaster, recovery, timeLockPeriodSec, eventForwarder);
@@ -150,7 +136,6 @@ contract BloxchainWallet is GuardController, RuntimeRBAC, SecureOwnable {
         // Load custom definitions from each definition contract (no duplicates, bounded sizes, allowProtectedSchemas=false)
         for (uint256 i = 0; i < definitionContracts.length; i++) {
             address def = address(definitionContracts[i]);
-            // SharedValidation.validateNotZeroAddress(def);
 
             // Require ERC165 IDefinition support for clearer errors and safety
             if (!definitionContracts[i].supportsInterface(type(IDefinition).interfaceId)) {
@@ -177,18 +162,7 @@ contract BloxchainWallet is GuardController, RuntimeRBAC, SecureOwnable {
         }
     }
 
-    // ============ DEPOSIT & INTERFACE FUNCTIONS ============
-
-    /**
-     * @dev Explicit deposit function for ETH deposits
-     * @notice Users must call this function to deposit ETH to the wallet controller
-     * @notice Direct ETH transfers to the contract will revert (receive/fallback revert)
-     * @notice ETH can still be forced in without calling deposit() (e.g. selfdestruct); such balance will not emit EthReceived
-     */
-    function deposit() external payable {
-        emit EthReceived(msg.sender, msg.value);
-        // ETH is automatically added to contract balance
-    }
+    // ============ INTERFACE FUNCTIONS ============
 
     /**
      * @dev See {IERC165-supportsInterface}.
@@ -197,49 +171,26 @@ contract BloxchainWallet is GuardController, RuntimeRBAC, SecureOwnable {
         public
         view
         virtual
-        override(GuardController, RuntimeRBAC, SecureOwnable)
+        override(Account)
         returns (bool)
     {
-        return
-            GuardController.supportsInterface(interfaceId) ||
-            RuntimeRBAC.supportsInterface(interfaceId) ||
-            SecureOwnable.supportsInterface(interfaceId);
-    }
-
-    // ============ FALLBACK & RECEIVE FUNCTIONS ============
-
-    /**
-     * @dev Fallback function to reject accidental calls
-     * @notice Prevents accidental ETH transfers and unknown function calls
-     * @notice Users must use deposit() function to send ETH
-     */
-    fallback() external payable {
-        revert SharedValidation.NotSupported();
-    }
-
-    /**
-     * @dev Receive function to reject direct ETH transfers
-     * @notice Prevents accidental ETH transfers
-     * @notice Users must use deposit() function to send ETH
-     */
-    receive() external payable {
-        revert SharedValidation.NotSupported();
+        return super.supportsInterface(interfaceId);
     }
 
     // ============ OVERRIDE FUNCTIONS ============
 
     /**
-     * @dev Override to resolve ambiguity between BaseStateMachine and SecureOwnable
+     * @dev Updates the time lock period with validation.
      * @param newTimeLockPeriodSec The new time lock period in seconds
      * @notice Validates that the new time lock period is between MIN_TIME_LOCK_PERIOD and MAX_TIME_LOCK_PERIOD
      */
     function _updateTimeLockPeriod(uint256 newTimeLockPeriodSec)
         internal
         virtual
-        override(BaseStateMachine, SecureOwnable)
+        override(BaseStateMachine)
     {
         _validateTimeLockPeriod(newTimeLockPeriodSec);
-        SecureOwnable._updateTimeLockPeriod(newTimeLockPeriodSec);
+        super._updateTimeLockPeriod(newTimeLockPeriodSec);
     }
 
     // ============ INTERNAL FUNCTIONS ============
@@ -263,12 +214,7 @@ contract BloxchainWallet is GuardController, RuntimeRBAC, SecureOwnable {
     ) internal {
         // Validate time lock period before initialization
         _validateTimeLockPeriod(timeLockPeriodSec);
-        
-        // Initialize all parent contracts.
-        // The guarded initialization ensures BaseStateMachine is only initialized once.
-        GuardController.initialize(initialOwner, broadcaster, recovery, timeLockPeriodSec, eventForwarder);
-        RuntimeRBAC.initialize(initialOwner, broadcaster, recovery, timeLockPeriodSec, eventForwarder);
-        SecureOwnable.initialize(initialOwner, broadcaster, recovery, timeLockPeriodSec, eventForwarder);
+        super.initialize(initialOwner, broadcaster, recovery, timeLockPeriodSec, eventForwarder);
     }
 
     /**
