@@ -1,10 +1,13 @@
-# Contributing to Bloxchain Wallet
+# Contributing to Blox-Apps
 
-Thank you for your interest in contributing to Bloxchain Wallet! This document provides guidelines and information for contributors.
+Thank you for your interest in contributing to **Blox-Apps**, the application hub for Bloxchain-based applications. This document covers contributing to **official applications** (e.g. Bloxchain Wallet) and adding **community blox**.
 
 ## Table of Contents
 
 - [Code of Conduct](#code-of-conduct)
+- [Repository Structure](#repository-structure)
+- [Contributing to Official-Blox](#contributing-to-official-blox)
+- [Adding a Community Blox](#adding-a-community-blox)
 - [Getting Started](#getting-started)
 - [Development Setup](#development-setup)
 - [Contributing Process](#contributing-process)
@@ -15,7 +18,27 @@ Thank you for your interest in contributing to Bloxchain Wallet! This document p
 
 ## Code of Conduct
 
-This project follows professional standards of conduct. By participating, you agree to uphold respectful and professional behavior. Please report unacceptable behavior to [support@particlecs.com](mailto:support@particlecs.com).
+This project follows our [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you agree to uphold respectful and professional behavior. Report unacceptable behavior to [conduct@particlecs.com](mailto:conduct@particlecs.com).
+
+## Repository Structure
+
+- **`contracts/Official-Blox/`** – Official Bloxchain applications. Covered by the repository [LICENSE](LICENSE) (AGPL-3.0 / Commercial). Contributions here require agreeing to the [License Agreement](#license-agreement) below.
+- **`contracts/community-blox/`** – Community-contributed applications. **Excluded** from the repo LICENSE; each blox defines its own license (default MIT). See [contracts/community-blox/README.md](contracts/community-blox/README.md).
+
+## Contributing to Official-Blox
+
+Contributions to Official-Blox (e.g. Bloxchain Wallet) follow the development setup, code standards, testing, and PR process described below. You must agree to the [License Agreement](#license-agreement) for your contributions to Official-Blox.
+
+## Adding a Community Blox
+
+To add a **community blox** under `contracts/community-blox/`:
+
+1. Create a subfolder with a descriptive name (e.g. `my-app`).
+2. Add your contracts, tests, and a README.
+3. **Include a LICENSE file** (or clear license notice) in your subfolder. If you do not, the default is **MIT**.
+4. Open a PR; maintainers will review for obvious issues and alignment with the hub.
+
+Your blox is **not** covered by the repository LICENSE; only the license you specify (or MIT by default) applies. See [contracts/community-blox/README.md](contracts/community-blox/README.md) for full details.
 
 ## Getting Started
 
@@ -35,8 +58,8 @@ Before contributing, ensure you have:
 
 ```bash
 # Clone the repository
-git clone https://github.com/PracticalParticle/Bloxchain-Wallet.git
-cd Bloxchain-Wallet
+git clone https://github.com/PracticalParticle/Blox-Apps.git
+cd Blox-Apps
 
 # Install dependencies
 npm install
@@ -53,12 +76,15 @@ npm test
 ### Project Structure
 
 ```text
-Bloxchain-Wallet/
-├── contracts/           # Smart contracts
-│   └── BloxchainWallet.sol
-├── test/               # Test files
-├── hardhat.config.cjs  # Hardhat configuration
-└── package.json        # Dependencies
+Blox-Apps/
+├── contracts/
+│   ├── Official-Blox/     # Official applications (e.g. Bloxchain Wallet)
+│   │   └── Wallets/
+│   │       └── BloxchainWallet.sol
+│   └── community-blox/    # Community applications (own license each; default MIT)
+├── test/                  # Test files (official apps)
+├── docs/                  # Documentation and plans
+└── package.json           # Dependencies
 ```
 
 ## Contributing Process
@@ -68,11 +94,11 @@ Bloxchain-Wallet/
 ```bash
 # Fork the repository on GitHub
 # Clone your fork
-git clone https://github.com/YOUR_USERNAME/Bloxchain-Wallet.git
-cd Bloxchain-Wallet
+git clone https://github.com/YOUR_USERNAME/Blox-Apps.git
+cd Blox-Apps
 
 # Add upstream remote
-git remote add upstream https://github.com/PracticalParticle/Bloxchain-Wallet.git
+git remote add upstream https://github.com/PracticalParticle/Blox-Apps.git
 ```
 
 ### 2. Create a Branch
@@ -167,15 +193,15 @@ Then create a Pull Request on GitHub with:
 
 ## License Agreement
 
-### Contributor License Agreement
+### Contributor License Agreement (Official-Blox only)
 
-**IMPORTANT:** By contributing to Bloxchain Wallet, you agree to the following licensing terms:
+**IMPORTANT:** By contributing to **Official-Blox** (e.g. Bloxchain Wallet) in this repository, you agree to the following licensing terms. Contributions to **community-blox** are governed by the license you specify in your blox folder (default MIT); see [contracts/community-blox/README.md](contracts/community-blox/README.md).
 
-1. **Your contributions will be licensed under the same dual-license model** as Bloxchain Wallet:
+1. **Your contributions to Official-Blox will be licensed under the same dual-license model** as the official applications:
    - **GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later)**, AND
    - **Bloxchain Wallet Commercial License** (proprietary license)
 
-2. **You grant Particle Crypto Security the right to relicense your contributions** under both:
+2. **You grant Particle Crypto Security the right to relicense your Official-Blox contributions** under both:
    - The AGPL-3.0-or-later license (for the Community Edition), and
    - The Bloxchain Wallet Commercial License (for commercial customers)
 
@@ -185,11 +211,12 @@ Then create a Pull Request on GitHub with:
    - Your contributions are in the public domain
 
 4. **You understand that:**
-   - Your contributions may be used in both open-source and commercial contexts
-   - Particle Crypto Security retains the right to offer Bloxchain Wallet under both licenses
+   - Your Official-Blox contributions may be used in both open-source and commercial contexts
+   - Particle Crypto Security retains the right to offer official applications under both licenses
+   - This agreement does not apply to code you add under `contracts/community-blox/` (which uses the license you specify there)
    - This agreement does not grant you any rights to the commercial license beyond what AGPL-3.0 provides
 
-By submitting a Pull Request or contributing code to this repository, you acknowledge that you have read, understood, and agree to these terms.
+By submitting a Pull Request that modifies **Official-Blox** (or other repo-licensed code), you acknowledge that you have read, understood, and agree to these terms. PRs that only add or change content under `contracts/community-blox/` are not subject to this CLA; your blox’s own license applies.
 
 ---
 

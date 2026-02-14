@@ -1,29 +1,34 @@
-Bloxchain Wallet Dual Licensing Notice
-======================================
+Blox-Apps Dual Licensing Notice
+==============================
 
 Copyright (c) 2025 Particle Crypto Security
 
-The Bloxchain Wallet application is offered under a **dual license model**:
+**Exclusion – Community Blox**
+The directory `contracts/community-blox/` is **excluded** from this license. Code and content under `contracts/community-blox/` are not licensed under the terms below. Each blox in that folder defines its own license (default MIT unless overridden by the author). See `contracts/community-blox/README.md` for details.
+
+---
+
+Official-Blox applications in this repository are offered under a **dual license model**:
 
 1. **Community Edition – GNU Affero General Public License v3.0 (AGPL-3.0-or-later)**
    - You may use, modify, and redistribute the software under the terms of the
      GNU Affero General Public License, version 3 or (at your option) any later version.
    - See the full AGPL-3.0 text below for complete terms.
 
-2. **Commercial License – Bloxchain Wallet Commercial License**
+2. **Commercial License – Blox-Apps Commercial License**
    - For organizations that wish to:
-     - Integrate Bloxchain Wallet into **proprietary or closed-source products**,
-     - Run Bloxchain Wallet as a **hosted or SaaS service** without AGPL copyleft obligations,
+     - Integrate Official-Blox applications into **proprietary or closed-source products**,
+     - Run Official-Blox applications as a **hosted or SaaS service** without AGPL copyleft obligations,
      - Obtain **commercial support or custom terms**,
      a separate commercial license is available from Particle Crypto Security.
    - For details, pricing, and terms, contact: **legal@particlecs.com** or visit the
      official Particle CS website.
 
-By default, if you obtained Bloxchain Wallet from the public source code repository
+By default, if you obtained this software from the public source code repository
 and **do not** have a separate written commercial agreement with Particle Crypto Security,
 your use is governed by the **AGPL-3.0-or-later** terms below.
 
-If you have entered into a separate commercial license agreement for Bloxchain Wallet,
+If you have entered into a separate commercial license agreement for Official-Blox,
 the terms of that commercial agreement **supersede** the AGPL-3.0 terms for your
 permitted uses under that agreement.
 
@@ -36,7 +41,7 @@ Source to those users in accordance with AGPL-3.0 (e.g. by offering access to th
 source; for unmodified versions, this may be satisfied by directing users to the
 official repository where the source is available), or to obtain a commercial
 license from Particle Crypto Security. If you wish to operate a closed-source or
-proprietary SaaS or hosted service based on Bloxchain Wallet without such disclosure,
+proprietary SaaS or hosted service based on this software without such disclosure,
 you must obtain a commercial license. Contact: legal@particlecs.com.
 
 ----------------------------------------------------------------------

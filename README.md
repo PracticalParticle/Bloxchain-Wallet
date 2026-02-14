@@ -1,18 +1,29 @@
-# Bloxchain Wallet
+# Blox-Apps
 
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-green.svg)](https://opensource.org/licenses/AGPL-3.0)
 [![Solidity](https://img.shields.io/badge/Solidity-0.8.33-blue.svg)](https://soliditylang.org/)
 [![Bloxchain Protocol](https://img.shields.io/badge/Bloxchain-Protocol-blue.svg)](https://github.com/PracticalParticle/Bloxchain-Protocol)
 [![Particle CS](https://img.shields.io/badge/Particle-CS-blue.svg)](https://particlecs.com/)
 
-The **official on-chain smart programable account** for the Bloxchain Wallet application, built on the [Bloxchain Protocol](https://github.com/PracticalParticle/Bloxchain-Protocol). Bloxchain Wallet combines **GuardController**, **RuntimeRBAC**, and **SecureOwnable** to provide enterprise-grade multi-signature workflows, dynamic role-based access control, and secure ownership management in a single deployable contract.
+**Blox-Apps** is the **application hub** for Bloxchain-based applications. Each application is a standalone on-chain application (in contract form); this repository centralizes official and community applications into one Blox hub, built on the [Bloxchain Protocol](https://github.com/PracticalParticle/Bloxchain-Protocol).
 
 > **⚠️ EXPERIMENTAL SOFTWARE WARNING**  
 > This repository contains experimental smart contract code. While the framework is feature-complete and tested, it is not yet audited for production use. Use at your own risk and do not deploy with real assets without proper security review.
 
 ---
 
-## What is Bloxchain Wallet?
+## Repository structure
+
+| Path | Description |
+|------|-------------|
+| **`contracts/Official-Blox/`** | Official Bloxchain applications (e.g. Bloxchain Wallet). Covered by the repository [LICENSE](LICENSE) (dual license: AGPL-3.0 / Commercial). |
+| **`contracts/community-blox/`** | Community-contributed applications. **Excluded** from the repo LICENSE; each blox defines its own license (default MIT). See [contracts/community-blox/README.md](contracts/community-blox/README.md). |
+
+---
+
+## Official-Blox: Bloxchain Wallet
+
+The **Bloxchain Wallet** is the first official application in the hub: the official on-chain smart programmable account for the Bloxchain Wallet app.
 
 Bloxchain Wallet is the **core on-chain infrastructure** for the Bloxchain Wallet application. It is powered by the Bloxchain Protocol and provides:
 
@@ -28,16 +39,21 @@ The contract serves as the single on-chain entry point for the Bloxchain Wallet 
 
 ### Contract Hierarchy
 
+**BloxchainWallet** is the **account contract** that wraps the internal Bloxchain Protocol components (via the Account pattern). The hierarchy:
+
 ```
-BloxchainWallet
-    ├── GuardController   (execution workflows, time-locks, external call control)
-    ├── RuntimeRBAC      (dynamic roles, function permissions, batch config)
-    └── SecureOwnable    (owner/broadcaster/recovery, time-locked ownership)
-            └── BaseStateMachine (state machine, meta-transactions)
-                    └── EngineBlox (core library: SecureOperationState, multi-phase workflows)
+BloxchainWallet   (account contract – wraps the components below)
+    └── Account   (protocol pattern: GuardController + RuntimeRBAC + SecureOwnable)
+            ├── GuardController   (execution workflows, time-locks, external call control)
+            ├── RuntimeRBAC      (dynamic roles, function permissions, batch config)
+            └── SecureOwnable    (owner/broadcaster/recovery, time-locked ownership)
+                    └── BaseStateMachine (state machine, meta-transactions)
+                            └── EngineBlox (core library: SecureOperationState, multi-phase workflows)
 ```
 
 ### Core Components (from Bloxchain Protocol)
+
+The account contract wraps the following protocol components:
 
 | Component | Role in Bloxchain Wallet |
 |-----------|---------------------------|
@@ -147,8 +163,8 @@ Only `deposit()` is accepted for ETH. This keeps behavior explicit and avoids mi
 ### Installation
 
 ```bash
-git clone https://github.com/PracticalParticle/Bloxchain-Wallet.git
-cd Bloxchain-Wallet
+git clone https://github.com/PracticalParticle/Blox-Apps.git
+cd Blox-Apps
 
 npm install
 ```
@@ -311,33 +327,25 @@ For protocol-level security (multi-sig, RBAC, GuardController), see the [Bloxcha
 
 ## License
 
-Bloxchain Wallet is **dual-licensed**:
-
-- **Community Edition**: **GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later)**.
-- **Commercial**: Proprietary **Bloxchain Wallet Commercial License** for organizations that need to integrate Bloxchain Wallet into proprietary products or run it as a hosted/SaaS service without AGPL copyleft obligations.
-
-See:
-
-- `LICENSE` – dual-licensing notice and full AGPL-3.0 text  
-- `LICENSE-COMMERCIAL.md` – commercial license summary and contact details  
+- **Official-Blox** (including Bloxchain Wallet) is **dual-licensed**: **GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later)** and **Bloxchain Wallet Commercial License**. See [LICENSE](LICENSE) and [LICENSE-COMMERCIAL.md](LICENSE-COMMERCIAL.md).
+- **`contracts/community-blox/`** is **excluded** from the repository LICENSE; each community blox defines its own license (default MIT). See [contracts/community-blox/README.md](contracts/community-blox/README.md).
 
 ---
 
 ## Contributing
 
-We welcome contributions. See [CONTRIBUTING.md](CONTRIBUTING.md) for:
+We welcome contributions to official apps and new community blox. See:
 
-- Development setup and guidelines  
-- Code standards and testing requirements  
-- Pull request process  
-- **Important:** Contributor License Agreement for dual licensing  
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** – Development setup, code standards, pull request process, and adding applications  
+- **[SECURITY.md](SECURITY.md)** – How to report vulnerabilities  
+- **[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)** – Community standards  
 
 ---
 
 ## Acknowledgments
 
 - **[Bloxchain Protocol](https://github.com/PracticalParticle/Bloxchain-Protocol)** – Core security framework and AccountBlox template  
-- **[Particle Crypto Security](https://particlecs.com/)** – Bloxchain Wallet implementation  
+- **[Particle Crypto Security](https://particlecs.com/)** – Blox-Apps and Bloxchain Wallet  
 - **OpenZeppelin** – Upgradeable and security patterns  
 - **Foundry / Hardhat** – Compilation and testing  
 
