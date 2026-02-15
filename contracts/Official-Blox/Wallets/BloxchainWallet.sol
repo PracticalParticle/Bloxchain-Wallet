@@ -2,11 +2,12 @@
 // Copyright (c) 2025 Particle Crypto Security
 pragma solidity 0.8.33;
 
-import "@bloxchain/contracts/core/pattern/Account.sol";
-import "@bloxchain/contracts/core/base/BaseStateMachine.sol";
-import "@bloxchain/contracts/core/lib/utils/SharedValidation.sol";
-import "@bloxchain/contracts/core/lib/interfaces/IDefinition.sol";
-import "@bloxchain/contracts/standards/behavior/ICopyable.sol";
+import { Account } from "@bloxchain/contracts/core/pattern/Account.sol";
+import { BaseStateMachine } from "@bloxchain/contracts/core/base/BaseStateMachine.sol";
+import { SharedValidation } from "@bloxchain/contracts/core/lib/utils/SharedValidation.sol";
+import { IDefinition } from "@bloxchain/contracts/core/lib/interfaces/IDefinition.sol";
+import { EngineBlox } from "@bloxchain/contracts/core/lib/EngineBlox.sol";
+import { ICopyable } from "@bloxchain/contracts/standards/behavior/ICopyable.sol";
 
 /**
  * @title BloxchainWallet

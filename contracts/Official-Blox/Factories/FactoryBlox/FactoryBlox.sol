@@ -2,19 +2,19 @@
 // Copyright (c) 2025 Particle Crypto Security
 pragma solidity 0.8.33;
 
-import "@openzeppelin/contracts/proxy/Clones.sol";
-import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
-import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import "@bloxchain/contracts/core/execution/GuardController.sol";
-import "@bloxchain/contracts/core/access/RuntimeRBAC.sol";
-import "@bloxchain/contracts/core/security/SecureOwnable.sol";
-import "@bloxchain/contracts/core/base/interface/IBaseStateMachine.sol";
-import "@bloxchain/contracts/core/lib/EngineBlox.sol";
-import "@bloxchain/contracts/standards/behavior/ICopyable.sol";
-import "@bloxchain/contracts/core/lib/interfaces/IDefinition.sol";
-import "@bloxchain/contracts/core/lib/interfaces/IEventForwarder.sol";
-import "@bloxchain/contracts/core/lib/utils/SharedValidation.sol";
-import "./FactoryBloxDefinitions.sol";
+import { Clones } from "@openzeppelin/contracts/proxy/Clones.sol";
+import { ERC165Checker } from "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
+import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import { GuardController } from "@bloxchain/contracts/core/execution/GuardController.sol";
+import { RuntimeRBAC } from "@bloxchain/contracts/core/access/RuntimeRBAC.sol";
+import { SecureOwnable } from "@bloxchain/contracts/core/security/SecureOwnable.sol";
+import { IBaseStateMachine } from "@bloxchain/contracts/core/base/interface/IBaseStateMachine.sol";
+import { EngineBlox } from "@bloxchain/contracts/core/lib/EngineBlox.sol";
+import { ICopyable } from "@bloxchain/contracts/standards/behavior/ICopyable.sol";
+import { IDefinition } from "@bloxchain/contracts/core/lib/interfaces/IDefinition.sol";
+import { IEventForwarder } from "@bloxchain/contracts/core/lib/interfaces/IEventForwarder.sol";
+import { SharedValidation } from "@bloxchain/contracts/core/lib/utils/SharedValidation.sol";
+import { FactoryBloxDefinitions } from "./lib/FactoryBloxDefinitions.sol";
 
 /**
  * @title FactoryBlox
@@ -256,21 +256,9 @@ contract FactoryBlox is GuardController, RuntimeRBAC, SecureOwnable, IEventForwa
         return _clonesWhitelist.length();
     }
 
-    // function getWhitelistAtIndex(uint256 index) external view returns (address) {
-    //     return _clonesWhitelist.at(index);
-    // }
-
     function isWhitelisted(address bloxImplementation) external view returns (bool) {
         return _clonesWhitelist.contains(bloxImplementation);
     }
-
-    // /**
-    //  * @notice Returns the configured clone price for a given blox implementation.
-    //  * @dev Zero-valued fields indicate no explicit pricing (free clone) for this implementation.
-    //  */
-    // function getClonePrice(address bloxImplementation) external view returns (EngineBlox.PaymentDetails memory) {
-    //     return _clonePrices[bloxImplementation];
-    // }
 
     /**
      * @notice Returns whitelist entry (implementation + price) at a given index.
@@ -324,8 +312,6 @@ contract FactoryBlox is GuardController, RuntimeRBAC, SecureOwnable, IEventForwa
     ) external override {
         if (!_clones.contains(msg.sender)) revert SharedValidation.NoPermission(msg.sender);
 
-        _logComponentEvent(abi.encode(msg.sender, txId, functionSelector, status, requester, target, operationType));
-
         address eventForwarder = _secureState.eventForwarder;
         if (eventForwarder != address(0) && eventForwarder != address(this)) {
             try IEventForwarder(eventForwarder).forwardTxEvent(
@@ -340,5 +326,5 @@ contract FactoryBlox is GuardController, RuntimeRBAC, SecureOwnable, IEventForwa
         revert SharedValidation.NotSupported();
     }
 
-    uint256[50] private __gap;
+    uint256[50] private _gap;
 }

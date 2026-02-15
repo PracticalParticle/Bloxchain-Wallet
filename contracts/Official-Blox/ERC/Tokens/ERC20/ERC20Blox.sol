@@ -3,18 +3,18 @@
 pragma solidity 0.8.33;
 
 // OpenZeppelin
-import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { ERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import { ERC20BurnableUpgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // Core
-import "@bloxchain/contracts/core/pattern/Account.sol";
-import "@bloxchain/contracts/core/lib/interfaces/IDefinition.sol";
-import "@bloxchain/contracts/core/lib/utils/SharedValidation.sol";
-import "./lib/definitions/ERC20BloxDefinitions.sol";
+import { Account } from "@bloxchain/contracts/core/pattern/Account.sol";
+import { IDefinition } from "@bloxchain/contracts/core/lib/interfaces/IDefinition.sol";
+import { SharedValidation } from "@bloxchain/contracts/core/lib/utils/SharedValidation.sol";
+import { ERC20BloxDefinitions } from "./lib/definitions/ERC20BloxDefinitions.sol";
 
 // Standards
-import "@bloxchain/contracts/standards/behavior/ICopyable.sol";
+import { ICopyable } from "@bloxchain/contracts/standards/behavior/ICopyable.sol";
 
 /**
  * @title ERC20Blox
@@ -62,6 +62,8 @@ contract ERC20Blox is
         _addMacroSelector(ERC20BloxDefinitions.MINT_SELECTOR);
         _addMacroSelector(ERC20BloxDefinitions.BURN_SELECTOR);
         _addMacroSelector(ERC20BloxDefinitions.BURN_FROM_SELECTOR);
+
+        // Initialize ERC20 name and symbol
         (string memory name, string memory symbol) = abi.decode(initData, (string, string));
         __ERC20_init(name, symbol);
     }

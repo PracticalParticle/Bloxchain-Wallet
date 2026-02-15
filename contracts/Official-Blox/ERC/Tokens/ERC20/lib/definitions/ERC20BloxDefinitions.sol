@@ -2,8 +2,8 @@
 // Copyright (c) 2025 Particle Crypto Security
 pragma solidity 0.8.33;
 
-import "@bloxchain/contracts/core/lib/EngineBlox.sol";
-import "@bloxchain/contracts/core/lib/interfaces/IDefinition.sol";
+import { EngineBlox } from "@bloxchain/contracts/core/lib/EngineBlox.sol";
+import { IDefinition } from "@bloxchain/contracts/core/lib/interfaces/IDefinition.sol";
 
 /**
  * @title ERC20BloxDefinitions

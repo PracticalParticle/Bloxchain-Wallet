@@ -2,9 +2,9 @@
 // Copyright (c) 2025 Particle Crypto Security
 pragma solidity 0.8.33;
 
-import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
-import "@bloxchain/contracts/core/lib/EngineBlox.sol";
-import "@bloxchain/contracts/core/lib/interfaces/IDefinition.sol";
+import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import { EngineBlox } from "@bloxchain/contracts/core/lib/EngineBlox.sol";
+import { IDefinition } from "@bloxchain/contracts/core/lib/interfaces/IDefinition.sol";
 
 /**
  * @title FactoryBloxDefinitions
