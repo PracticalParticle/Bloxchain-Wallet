@@ -67,15 +67,6 @@ contract BloxchainWallet is Account, ICopyable {
         super.initialize(initialOwner, broadcaster, recovery, timeLockPeriodSec, eventForwarder);
     }
 
-    function setCloneData(bytes calldata initData) external {
-        if (!initialized()) revert SharedValidation.NotInitialized();
-        if (_cloneDataSet) revert SharedValidation.AlreadyInitialized();
-        _cloneDataSet = true;
-        (RoleConfig[] memory roles, IDefinition[] memory definitionContracts) =
-            abi.decode(initData, (RoleConfig[], IDefinition[]));
-        _applyRolesAndDefinitions(roles, definitionContracts);
-    }
-
     function supportsInterface(bytes4 interfaceId)
         public
         view

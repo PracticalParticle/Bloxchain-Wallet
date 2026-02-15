@@ -28,8 +28,8 @@
   },
   "homepage": "https://github.com/PracticalParticle/Bloxchain-Wallet#readme",
   "dependencies": {
-    "@bloxchain/contracts": "^1.0.0-alpha.7",
-    "@bloxchain/sdk": "^1.0.0-alpha.7"
+    "@bloxchain/contracts": "^1.0.0-alpha.11",
+    "@bloxchain/sdk": "^1.0.0-alpha.11"
   },
   "devDependencies": {
     "hardhat": "^3.1.5"
