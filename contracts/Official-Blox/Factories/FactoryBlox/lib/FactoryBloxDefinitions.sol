@@ -8,16 +8,15 @@ import { IDefinition } from "@bloxchain/contracts/core/lib/interfaces/IDefinitio
 
 /**
  * @title FactoryBloxDefinitions
- * @dev Library containing definitions for FactoryBlox cloneBlox, whitelist, pricing, and macro registration.
+ * @dev Library containing definitions for FactoryBlox cloneBlox and whitelist macro registration.
  *
- * Registers cloneBlox, whitelist (addToWhitelist, removeFromWhitelist), and pricing (setClonePrice)
- * function schemas. OWNER_ROLE gets EXECUTE_TIME_DELAY_REQUEST so requests go via the controller.
- * All four are macro selectors so the controller can target address(this).
+ * Registers cloneBlox, addToWhitelist, and removeFromWhitelist function schemas.
+ * OWNER_ROLE gets EXECUTE_TIME_DELAY_REQUEST so requests go via the controller.
+ * All three are macro selectors so the controller can target address(this).
  */
 library FactoryBloxDefinitions {
     bytes32 public constant CLONE_OPERATION = keccak256("CLONE_OPERATION");
     bytes32 public constant WHITELIST_OPERATION = keccak256("WHITELIST_OPERATION");
-    bytes32 public constant CLONE_PRICE_OPERATION = keccak256("CLONE_PRICE_OPERATION");
 
     /// @dev Macro selectors (allowed to target address(this) for GuardController execution)
     bytes4 public constant CLONE_BLOX_SELECTOR =
@@ -26,12 +25,9 @@ library FactoryBloxDefinitions {
     bytes4 public constant ADD_TO_WHITELIST_SELECTOR =
         bytes4(keccak256("addToWhitelist(address,(address,uint256,address,uint256))"));
     bytes4 public constant REMOVE_FROM_WHITELIST_SELECTOR = bytes4(keccak256("removeFromWhitelist(address)"));
-    // setClonePrice(address,(address,uint256,address,uint256))
-    bytes4 public constant SET_CLONE_PRICE_SELECTOR =
-        bytes4(keccak256("setClonePrice(address,(address,uint256,address,uint256))"));
 
     function getFunctionSchemas() public pure returns (EngineBlox.FunctionSchema[] memory) {
-        EngineBlox.FunctionSchema[] memory schemas = new EngineBlox.FunctionSchema[](4);
+        EngineBlox.FunctionSchema[] memory schemas = new EngineBlox.FunctionSchema[](3);
 
         EngineBlox.TxAction[] memory timeDelayRequestActions = new EngineBlox.TxAction[](1);
         timeDelayRequestActions[0] = EngineBlox.TxAction.EXECUTE_TIME_DELAY_REQUEST;
@@ -72,25 +68,12 @@ library FactoryBloxDefinitions {
             handlerForSelectors: removeWhitelistHandlers
         });
 
-        // Schema 3: setClonePrice (per-implementation pricing configuration for cloneBlox)
-        bytes4[] memory setClonePriceHandlers = new bytes4[](1);
-        setClonePriceHandlers[0] = SET_CLONE_PRICE_SELECTOR;
-        schemas[3] = EngineBlox.FunctionSchema({
-            functionSignature: "setClonePrice(address,(address,uint256,address,uint256))",
-            functionSelector: SET_CLONE_PRICE_SELECTOR,
-            operationType: CLONE_PRICE_OPERATION,
-            operationName: "CLONE_PRICE_OPERATION",
-            supportedActionsBitmap: EngineBlox.createBitmapFromActions(timeDelayRequestActions),
-            isProtected: true,
-            handlerForSelectors: setClonePriceHandlers
-        });
-
         return schemas;
     }
 
     function getRolePermissions() public pure returns (IDefinition.RolePermission memory) {
-        bytes32[] memory roleHashes = new bytes32[](4);
-        EngineBlox.FunctionPermission[] memory functionPermissions = new EngineBlox.FunctionPermission[](4);
+        bytes32[] memory roleHashes = new bytes32[](3);
+        EngineBlox.FunctionPermission[] memory functionPermissions = new EngineBlox.FunctionPermission[](3);
 
         EngineBlox.TxAction[] memory ownerRequestActions = new EngineBlox.TxAction[](1);
         ownerRequestActions[0] = EngineBlox.TxAction.EXECUTE_TIME_DELAY_REQUEST;
@@ -120,16 +103,6 @@ library FactoryBloxDefinitions {
             functionSelector: REMOVE_FROM_WHITELIST_SELECTOR,
             grantedActionsBitmap: EngineBlox.createBitmapFromActions(ownerRequestActions),
             handlerForSelectors: removeWhitelistHandlers
-        });
-
-        // Owner: setClonePrice
-        roleHashes[3] = EngineBlox.OWNER_ROLE;
-        bytes4[] memory setClonePriceHandlers = new bytes4[](1);
-        setClonePriceHandlers[0] = SET_CLONE_PRICE_SELECTOR;
-        functionPermissions[3] = EngineBlox.FunctionPermission({
-            functionSelector: SET_CLONE_PRICE_SELECTOR,
-            grantedActionsBitmap: EngineBlox.createBitmapFromActions(ownerRequestActions),
-            handlerForSelectors: setClonePriceHandlers
         });
 
         return IDefinition.RolePermission({

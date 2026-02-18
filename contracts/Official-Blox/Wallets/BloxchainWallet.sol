@@ -24,8 +24,6 @@ contract BloxchainWallet is Account, ICopyable {
     uint256 public constant MAX_SCHEMAS_PER_DEFINITION = 100;
     uint256 public constant MAX_PERMISSIONS_PER_DEFINITION = 200;
 
-    bool private _cloneDataSet;
-
     struct RoleConfig {
         string roleName;
         uint256 maxWallets;
