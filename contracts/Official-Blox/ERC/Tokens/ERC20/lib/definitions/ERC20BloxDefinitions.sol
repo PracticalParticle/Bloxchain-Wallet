@@ -21,6 +21,7 @@ library ERC20BloxDefinitions {
     bytes4 public constant MINT_SELECTOR = bytes4(keccak256("mint(address,uint256)"));
     bytes4 public constant BURN_SELECTOR = bytes4(keccak256("burn(uint256)"));
     bytes4 public constant BURN_FROM_SELECTOR = bytes4(keccak256("burnFrom(address,uint256)"));
+    bytes4 public constant SET_ACCESS_MODE_SELECTOR = bytes4(keccak256("setAccessMode(uint256)"));
 
     bytes32 public constant ERC20_OPERATION = keccak256("ERC20_OPERATION");
 
@@ -28,7 +29,7 @@ library ERC20BloxDefinitions {
      * @dev Returns function schemas for ERC20Blox execution selectors (used by controller).
      */
     function getFunctionSchemas() public pure returns (EngineBlox.FunctionSchema[] memory) {
-        EngineBlox.FunctionSchema[] memory schemas = new EngineBlox.FunctionSchema[](5);
+        EngineBlox.FunctionSchema[] memory schemas = new EngineBlox.FunctionSchema[](6);
 
         EngineBlox.TxAction[] memory timeDelayRequestActions = new EngineBlox.TxAction[](1);
         timeDelayRequestActions[0] = EngineBlox.TxAction.EXECUTE_TIME_DELAY_REQUEST;
@@ -110,6 +111,18 @@ library ERC20BloxDefinitions {
             handlerForSelectors: burnFromHandlers
         });
 
+        bytes4[] memory setAccessModeHandlers = new bytes4[](1);
+        setAccessModeHandlers[0] = SET_ACCESS_MODE_SELECTOR;
+        schemas[5] = EngineBlox.FunctionSchema({
+            functionSignature: "setAccessMode(uint256)",
+            functionSelector: SET_ACCESS_MODE_SELECTOR,
+            operationType: ERC20_OPERATION,
+            operationName: "ERC20_SET_ACCESS_MODE",
+            supportedActionsBitmap: actionsBitmap,
+            isProtected: true,
+            handlerForSelectors: setAccessModeHandlers
+        });
+
         return schemas;
     }
 
@@ -117,8 +130,8 @@ library ERC20BloxDefinitions {
      * @dev Returns role permissions for ERC20Blox execution selectors (OWNER and BROADCASTER).
      */
     function getRolePermissions() public pure returns (IDefinition.RolePermission memory) {
-        bytes32[] memory roleHashes = new bytes32[](10);
-        EngineBlox.FunctionPermission[] memory functionPermissions = new EngineBlox.FunctionPermission[](10);
+        bytes32[] memory roleHashes = new bytes32[](11);
+        EngineBlox.FunctionPermission[] memory functionPermissions = new EngineBlox.FunctionPermission[](11);
 
         EngineBlox.TxAction[] memory ownerTimeLockRequest = new EngineBlox.TxAction[](1);
         ownerTimeLockRequest[0] = EngineBlox.TxAction.EXECUTE_TIME_DELAY_REQUEST;
@@ -170,6 +183,15 @@ library ERC20BloxDefinitions {
                 handlerForSelectors: selfRef
             });
         }
+
+        bytes4[] memory setAccessModeSelfRef = new bytes4[](1);
+        setAccessModeSelfRef[0] = SET_ACCESS_MODE_SELECTOR;
+        roleHashes[10] = EngineBlox.OWNER_ROLE;
+        functionPermissions[10] = EngineBlox.FunctionPermission({
+            functionSelector: SET_ACCESS_MODE_SELECTOR,
+            grantedActionsBitmap: ownerBitmap,
+            handlerForSelectors: setAccessModeSelfRef
+        });
 
         return IDefinition.RolePermission({
             roleHashes: roleHashes,
